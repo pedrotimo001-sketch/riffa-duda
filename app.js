@@ -2,7 +2,7 @@ const STORAGE_KEY = "rifa-baby-mirella-henry-v1";
 const FILTERS = ["all", "Livre", "Reservado", "Pago"];
 
 const state = {
-  ticketValue: 20,
+  ticketValue: 10,
   activeFilter: "all",
   query: "",
   selectedNumber: null,
@@ -13,6 +13,7 @@ const els = {
   grid: document.querySelector("#grid"),
   template: document.querySelector("#ticketTemplate"),
   ticketValue: document.querySelector("#ticketValue"),
+  ticketValueBadge: document.querySelector("#ticketValueBadge"),
   searchInput: document.querySelector("#searchInput"),
   chips: [...document.querySelectorAll(".chip")],
   paidTotal: document.querySelector("#paidTotal"),
@@ -58,7 +59,7 @@ function load() {
       return;
     }
 
-    state.ticketValue = Number(saved.ticketValue || 20);
+    state.ticketValue = Number(saved.ticketValue || 10);
     state.tickets = createTickets().map((fallback) => ({
       ...fallback,
       ...(saved.tickets.find((ticket) => Number(ticket.number) === fallback.number) || {})
@@ -91,7 +92,7 @@ function money(value) {
 }
 
 function numberLabel(number) {
-  return String(number).padStart(3, "0");
+  return String(number);
 }
 
 function normalize(value) {
@@ -134,6 +135,7 @@ function renderMetrics() {
   els.goalTotal.textContent = money(goalTotal);
   els.progressLabel.textContent = `${progress}%`;
   els.progressBar.style.width = `${progress}%`;
+  els.ticketValueBadge.textContent = money(state.ticketValue).replace(",00", "");
 }
 
 function renderGrid() {
@@ -240,7 +242,7 @@ function importBackup(file) {
     try {
       const data = JSON.parse(String(reader.result || "{}"));
       if (!Array.isArray(data.tickets)) throw new Error("Backup invalido");
-      state.ticketValue = Number(data.ticketValue || state.ticketValue || 20);
+      state.ticketValue = Number(data.ticketValue || state.ticketValue || 10);
       state.tickets = createTickets().map((fallback) => ({
         ...fallback,
         ...(data.tickets.find((ticket) => Number(ticket.number) === fallback.number) || {})
