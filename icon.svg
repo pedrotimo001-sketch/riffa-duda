@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Rifa Baby">
+  <rect width="512" height="512" rx="112" fill="#fff8fb"/>
+  <circle cx="164" cy="156" r="88" fill="#e8b8c8"/>
+  <circle cx="346" cy="156" r="88" fill="#a9d8ee"/>
+  <path fill="#bd5578" d="M102 292c0-34 28-62 62-62h184c34 0 62 28 62 62v78c0 34-28 62-62 62H164c-34 0-62-28-62-62v-78Z"/>
+  <path fill="#fff" d="M155 316h202v34H155zM155 370h126v30H155z"/>
+  <text x="256" y="190" text-anchor="middle" font-family="Arial, sans-serif" font-size="78" font-weight="800" fill="#211720">MH</text>
+</svg>
