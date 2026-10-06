@@ -14,6 +14,9 @@ const els = {
   template: document.querySelector("#ticketTemplate"),
   ticketValue: document.querySelector("#ticketValue"),
   ticketValueBadge: document.querySelector("#ticketValueBadge"),
+  posterFree: document.querySelector("#posterFree"),
+  posterReserved: document.querySelector("#posterReserved"),
+  posterPaid: document.querySelector("#posterPaid"),
   searchInput: document.querySelector("#searchInput"),
   chips: [...document.querySelectorAll(".chip")],
   paidTotal: document.querySelector("#paidTotal"),
@@ -36,6 +39,7 @@ const els = {
   clearTicket: document.querySelector("#clearTicket"),
   exportJson: document.querySelector("#exportJson"),
   exportCsv: document.querySelector("#exportCsv"),
+  shareSummary: document.querySelector("#shareSummary"),
   importJson: document.querySelector("#importJson"),
   resetDemo: document.querySelector("#resetDemo")
 };
@@ -130,12 +134,17 @@ function renderMetrics() {
   els.freeCount.textContent = free;
   els.reservedCount.textContent = reserved;
   els.paidMetric.textContent = paid;
+  if (els.posterFree) els.posterFree.textContent = free;
+  if (els.posterReserved) els.posterReserved.textContent = reserved;
+  if (els.posterPaid) els.posterPaid.textContent = paid;
   els.paidTotal.textContent = money(paidTotal);
   els.paidCount.textContent = `${paid} ${paid === 1 ? "numero pago" : "numeros pagos"}`;
   els.goalTotal.textContent = money(goalTotal);
   els.progressLabel.textContent = `${progress}%`;
   els.progressBar.style.width = `${progress}%`;
-  els.ticketValueBadge.textContent = money(state.ticketValue).replace(",00", "");
+  if (els.ticketValueBadge) {
+    els.ticketValueBadge.textContent = money(state.ticketValue).replace(",00", "");
+  }
 }
 
 function renderGrid() {
@@ -236,6 +245,33 @@ function exportCsv() {
   download(`rifa-baby-exportacao-${Date.now()}.csv`, csv, "text/csv;charset=utf-8");
 }
 
+async function shareSummary() {
+  const free = state.tickets.filter((ticket) => ticket.status === "Livre").length;
+  const reserved = state.tickets.filter((ticket) => ticket.status === "Reservado").length;
+  const paid = state.tickets.filter((ticket) => ticket.status === "Pago").length;
+  const available = state.tickets
+    .filter((ticket) => ticket.status === "Livre")
+    .map((ticket) => numberLabel(ticket.number))
+    .join(", ");
+  const text = [
+    "Rifa Baby Mirella ou Henry",
+    `${money(state.ticketValue).replace(",00", "")} cada numero`,
+    `Pagos: ${paid} | Reservados: ${reserved} | Livres: ${free}`,
+    available ? `Numeros livres: ${available}` : "Todos os numeros ja foram escolhidos."
+  ].join("\n");
+
+  if (navigator.share) {
+    await navigator.share({
+      title: "Rifa Baby Mirella ou Henry",
+      text
+    });
+    return;
+  }
+
+  await navigator.clipboard.writeText(text);
+  alert("Resumo copiado para compartilhar.");
+}
+
 function importBackup(file) {
   const reader = new FileReader();
   reader.onload = () => {
@@ -295,6 +331,11 @@ function wireEvents() {
 
   els.exportJson.addEventListener("click", exportBackup);
   els.exportCsv.addEventListener("click", exportCsv);
+  if (els.shareSummary) {
+    els.shareSummary.addEventListener("click", () => {
+      shareSummary().catch(() => alert("Nao foi possivel compartilhar agora."));
+    });
+  }
 
   els.importJson.addEventListener("change", () => {
     const [file] = els.importJson.files;
