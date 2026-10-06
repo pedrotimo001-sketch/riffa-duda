@@ -54,6 +54,21 @@
           <section id="grid" class="number-grid" aria-label="Numeros da rifa"></section>
         </section>
 
+        <section class="poster-stats" aria-label="Resumo da rifa">
+          <article>
+            <span>Disponiveis</span>
+            <strong id="posterFree">100</strong>
+          </article>
+          <article>
+            <span>Reservados</span>
+            <strong id="posterReserved">0</strong>
+          </article>
+          <article>
+            <span>Pagos</span>
+            <strong id="posterPaid">0</strong>
+          </article>
+        </section>
+
         <section class="prize-row" aria-label="Informacoes da rifa">
           <div class="prize-plaque">
             <strong><span id="ticketValueBadge">R$ 10</span> cada numero</strong>
@@ -125,6 +140,7 @@
         <section class="actions" aria-label="Backup e exportacao">
           <button id="exportJson" class="primary" type="button">Backup JSON</button>
           <button id="exportCsv" type="button">Exportar CSV</button>
+          <button id="shareSummary" type="button">Compartilhar</button>
           <label class="upload-button">
             Importar backup
             <input id="importJson" type="file" accept="application/json,.json">
@@ -134,6 +150,7 @@
 
         <section class="status-line" aria-live="polite">
           <span id="saveState">Salvo neste aparelho</span>
+          <span>Pronto para instalar no iPhone</span>
           <span id="lastUpdate"></span>
         </section>
       </section>
