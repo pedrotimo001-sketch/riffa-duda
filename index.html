@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <meta name="theme-color" content="#e8b8c8">
+    <meta name="theme-color" content="#f6c6d4">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Rifa Baby">
@@ -15,83 +15,128 @@
   </head>
   <body>
     <main class="app-shell">
-      <section class="hero">
-        <div>
-          <p class="eyebrow">Rifa Baby</p>
-          <h1>Mirella ou Henry</h1>
-          <p class="subtitle">Controle mobile-first com 100 numeros, nomes, telefone, status e backup.</p>
+      <section class="raffle-poster" aria-label="Rifa Baby Mirella ou Henry">
+        <div class="party-ribbon"></div>
+        <div class="balloons balloons-left" aria-hidden="true">
+          <span></span><span></span><span></span>
         </div>
-        <div class="hero-card">
-          <span class="hero-label">Arrecadado</span>
+        <div class="balloons balloons-right" aria-hidden="true">
+          <span></span><span></span><span></span>
+        </div>
+
+        <header class="poster-header">
+          <div class="bear bear-left" aria-hidden="true">
+            <span class="bear-crown"></span>
+            <span class="bear-ear left"></span>
+            <span class="bear-ear right"></span>
+            <span class="bear-face"></span>
+            <span class="bear-bow pink"></span>
+          </div>
+
+          <div class="title-lockup">
+            <span class="crown" aria-hidden="true"></span>
+            <p class="eyebrow">Rifa Baby</p>
+            <h1>Rifa Baby</h1>
+            <p class="script">Mirella ou Henry</p>
+            <div class="gold-divider" aria-hidden="true"><span></span></div>
+          </div>
+
+          <div class="bear bear-right" aria-hidden="true">
+            <span class="bear-crown"></span>
+            <span class="bear-ear left"></span>
+            <span class="bear-ear right"></span>
+            <span class="bear-face"></span>
+            <span class="bear-bow blue"></span>
+          </div>
+        </header>
+
+        <section class="board-frame">
+          <section id="grid" class="number-grid" aria-label="Numeros da rifa"></section>
+        </section>
+
+        <section class="prize-row" aria-label="Informacoes da rifa">
+          <div class="prize-plaque">
+            <strong><span id="ticketValueBadge">R$ 10</span> cada numero</strong>
+            <span>Premio: <b>R$ 150,00</b></span>
+            <span>Sorteio dia 01/01</span>
+          </div>
+          <div class="good-luck">
+            <span class="heart-pair" aria-hidden="true"></span>
+            <strong>Boa sorte!</strong>
+          </div>
+        </section>
+      </section>
+
+      <section class="control-panel" aria-label="Controles da rifa">
+        <div class="money-card">
+          <span>Arrecadado</span>
           <strong id="paidTotal">R$ 0,00</strong>
           <small id="paidCount">0 numeros pagos</small>
         </div>
+
+        <section class="toolbar" aria-label="Configuracoes e busca">
+          <label class="field compact">
+            <span>Valor por numero</span>
+            <input id="ticketValue" type="number" min="0" step="1" inputmode="decimal" value="10">
+          </label>
+
+          <label class="field search-field">
+            <span>Buscar</span>
+            <input id="searchInput" type="search" placeholder="Nome, telefone ou numero">
+          </label>
+
+          <div class="segmented" role="group" aria-label="Filtro de status">
+            <button class="chip active" data-filter="all" type="button">Todos</button>
+            <button class="chip" data-filter="Livre" type="button">Livre</button>
+            <button class="chip" data-filter="Reservado" type="button">Reservado</button>
+            <button class="chip" data-filter="Pago" type="button">Pago</button>
+          </div>
+        </section>
+
+        <section class="metrics" aria-label="Painel de arrecadacao">
+          <article class="metric">
+            <span>Livre</span>
+            <strong id="freeCount">100</strong>
+          </article>
+          <article class="metric">
+            <span>Reservado</span>
+            <strong id="reservedCount">0</strong>
+          </article>
+          <article class="metric">
+            <span>Pago</span>
+            <strong id="paidMetric">0</strong>
+          </article>
+          <article class="metric">
+            <span>Meta total</span>
+            <strong id="goalTotal">R$ 0,00</strong>
+          </article>
+        </section>
+
+        <section class="progress-wrap" aria-label="Progresso financeiro">
+          <div class="progress-top">
+            <span>Progresso de pagamento</span>
+            <strong id="progressLabel">0%</strong>
+          </div>
+          <div class="progress">
+            <span id="progressBar"></span>
+          </div>
+        </section>
+
+        <section class="actions" aria-label="Backup e exportacao">
+          <button id="exportJson" class="primary" type="button">Backup JSON</button>
+          <button id="exportCsv" type="button">Exportar CSV</button>
+          <label class="upload-button">
+            Importar backup
+            <input id="importJson" type="file" accept="application/json,.json">
+          </label>
+          <button id="resetDemo" class="danger" type="button">Limpar tudo</button>
+        </section>
+
+        <section class="status-line" aria-live="polite">
+          <span id="saveState">Salvo neste aparelho</span>
+          <span id="lastUpdate"></span>
+        </section>
       </section>
-
-      <section class="toolbar" aria-label="Configuracoes e busca">
-        <label class="field compact">
-          <span>Valor por numero</span>
-          <input id="ticketValue" type="number" min="0" step="1" inputmode="decimal" value="20">
-        </label>
-
-        <label class="field search-field">
-          <span>Buscar</span>
-          <input id="searchInput" type="search" placeholder="Nome, telefone ou numero">
-        </label>
-
-        <div class="segmented" role="group" aria-label="Filtro de status">
-          <button class="chip active" data-filter="all" type="button">Todos</button>
-          <button class="chip" data-filter="Livre" type="button">Livre</button>
-          <button class="chip" data-filter="Reservado" type="button">Reservado</button>
-          <button class="chip" data-filter="Pago" type="button">Pago</button>
-        </div>
-      </section>
-
-      <section class="metrics" aria-label="Painel de arrecadacao">
-        <article class="metric">
-          <span>Livre</span>
-          <strong id="freeCount">100</strong>
-        </article>
-        <article class="metric">
-          <span>Reservado</span>
-          <strong id="reservedCount">0</strong>
-        </article>
-        <article class="metric">
-          <span>Pago</span>
-          <strong id="paidMetric">0</strong>
-        </article>
-        <article class="metric">
-          <span>Meta total</span>
-          <strong id="goalTotal">R$ 0,00</strong>
-        </article>
-      </section>
-
-      <section class="progress-wrap" aria-label="Progresso financeiro">
-        <div class="progress-top">
-          <span>Progresso de pagamento</span>
-          <strong id="progressLabel">0%</strong>
-        </div>
-        <div class="progress">
-          <span id="progressBar"></span>
-        </div>
-      </section>
-
-      <section class="actions" aria-label="Backup e exportacao">
-        <button id="exportJson" class="primary" type="button">Backup JSON</button>
-        <button id="exportCsv" type="button">Exportar CSV</button>
-        <label class="upload-button">
-          Importar backup
-          <input id="importJson" type="file" accept="application/json,.json">
-        </label>
-        <button id="resetDemo" class="danger" type="button">Limpar tudo</button>
-      </section>
-
-      <section class="status-line" aria-live="polite">
-        <span id="saveState">Salvo neste aparelho</span>
-        <span id="lastUpdate"></span>
-      </section>
-
-      <section id="grid" class="number-grid" aria-label="Numeros da rifa"></section>
     </main>
 
     <dialog id="editorDialog">
@@ -99,7 +144,7 @@
         <header>
           <div>
             <span class="eyebrow">Numero</span>
-            <h2 id="editorNumber">001</h2>
+            <h2 id="editorNumber">1</h2>
           </div>
           <button class="icon-button" value="cancel" aria-label="Fechar" type="submit">x</button>
         </header>
