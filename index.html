@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#e8b8c8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Rifa Baby">
+    <title>Rifa Baby Mirella ou Henry</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="icon.svg">
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="hero">
+        <div>
+          <p class="eyebrow">Rifa Baby</p>
+          <h1>Mirella ou Henry</h1>
+          <p class="subtitle">Controle mobile-first com 100 numeros, nomes, telefone, status e backup.</p>
+        </div>
+        <div class="hero-card">
+          <span class="hero-label">Arrecadado</span>
+          <strong id="paidTotal">R$ 0,00</strong>
+          <small id="paidCount">0 numeros pagos</small>
+        </div>
+      </section>
+
+      <section class="toolbar" aria-label="Configuracoes e busca">
+        <label class="field compact">
+          <span>Valor por numero</span>
+          <input id="ticketValue" type="number" min="0" step="1" inputmode="decimal" value="20">
+        </label>
+
+        <label class="field search-field">
+          <span>Buscar</span>
+          <input id="searchInput" type="search" placeholder="Nome, telefone ou numero">
+        </label>
+
+        <div class="segmented" role="group" aria-label="Filtro de status">
+          <button class="chip active" data-filter="all" type="button">Todos</button>
+          <button class="chip" data-filter="Livre" type="button">Livre</button>
+          <button class="chip" data-filter="Reservado" type="button">Reservado</button>
+          <button class="chip" data-filter="Pago" type="button">Pago</button>
+        </div>
+      </section>
+
+      <section class="metrics" aria-label="Painel de arrecadacao">
+        <article class="metric">
+          <span>Livre</span>
+          <strong id="freeCount">100</strong>
+        </article>
+        <article class="metric">
+          <span>Reservado</span>
+          <strong id="reservedCount">0</strong>
+        </article>
+        <article class="metric">
+          <span>Pago</span>
+          <strong id="paidMetric">0</strong>
+        </article>
+        <article class="metric">
+          <span>Meta total</span>
+          <strong id="goalTotal">R$ 0,00</strong>
+        </article>
+      </section>
+
+      <section class="progress-wrap" aria-label="Progresso financeiro">
+        <div class="progress-top">
+          <span>Progresso de pagamento</span>
+          <strong id="progressLabel">0%</strong>
+        </div>
+        <div class="progress">
+          <span id="progressBar"></span>
+        </div>
+      </section>
+
+      <section class="actions" aria-label="Backup e exportacao">
+        <button id="exportJson" class="primary" type="button">Backup JSON</button>
+        <button id="exportCsv" type="button">Exportar CSV</button>
+        <label class="upload-button">
+          Importar backup
+          <input id="importJson" type="file" accept="application/json,.json">
+        </label>
+        <button id="resetDemo" class="danger" type="button">Limpar tudo</button>
+      </section>
+
+      <section class="status-line" aria-live="polite">
+        <span id="saveState">Salvo neste aparelho</span>
+        <span id="lastUpdate"></span>
+      </section>
+
+      <section id="grid" class="number-grid" aria-label="Numeros da rifa"></section>
+    </main>
+
+    <dialog id="editorDialog">
+      <form method="dialog" class="editor">
+        <header>
+          <div>
+            <span class="eyebrow">Numero</span>
+            <h2 id="editorNumber">001</h2>
+          </div>
+          <button class="icon-button" value="cancel" aria-label="Fechar" type="submit">x</button>
+        </header>
+
+        <label class="field">
+          <span>Nome da pessoa</span>
+          <input id="buyerName" type="text" autocomplete="name" placeholder="Ex.: Ana Paula">
+        </label>
+
+        <label class="field">
+          <span>Telefone</span>
+          <input id="buyerPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="(21) 99999-9999">
+        </label>
+
+        <label class="field">
+          <span>Status</span>
+          <select id="ticketStatus">
+            <option>Livre</option>
+            <option>Reservado</option>
+            <option>Pago</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Observacao</span>
+          <textarea id="ticketNote" rows="3" placeholder="Pix, combinado, responsavel..."></textarea>
+        </label>
+
+        <menu>
+          <button id="clearTicket" class="danger" value="default" type="button">Liberar numero</button>
+          <button id="saveTicket" class="primary" value="default" type="button">Salvar</button>
+        </menu>
+      </form>
+    </dialog>
+
+    <template id="ticketTemplate">
+      <button class="ticket" type="button">
+        <span class="ticket-number"></span>
+        <strong class="ticket-status"></strong>
+        <small class="ticket-person"></small>
+      </button>
+    </template>
+
+    <script src="app.js"></script>
+  </body>
+</html>
