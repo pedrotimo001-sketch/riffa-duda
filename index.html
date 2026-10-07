@@ -24,6 +24,7 @@
           <span>1 Escolher</span>
           <span>2 Pix</span>
           <span>3 Reservar</span>
+          <button id="adminToggle" class="admin-toggle" type="button">Admin</button>
         </div>
       </section>
 
@@ -105,7 +106,7 @@
         </section>
       </section>
 
-      <section class="control-panel" aria-label="Controles da rifa">
+      <section class="control-panel admin-only" aria-label="Controles da rifa">
         <header class="panel-head">
           <div>
             <span class="eyebrow">Painel do organizador</span>
@@ -207,7 +208,7 @@
           <input id="buyerPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="(21) 99999-9999">
         </label>
 
-        <label class="field">
+        <label class="field admin-only">
           <span>Status</span>
           <select id="ticketStatus">
             <option>Livre</option>
@@ -216,7 +217,7 @@
           </select>
         </label>
 
-        <label class="field">
+        <label class="field admin-only">
           <span>Observacao</span>
           <textarea id="ticketNote" rows="3" placeholder="Pix, combinado, responsavel..."></textarea>
         </label>
@@ -240,13 +241,14 @@
           <div class="pix-actions">
             <button id="copyPix" type="button">Copiar Pix</button>
             <button id="copyPixKey" type="button">Copiar chave</button>
+            <button id="sendProof" class="whatsapp-button" type="button">Enviar comprovante</button>
           </div>
           <small id="pixReceiver">Maria Eduarda Da Silva Santos</small>
         </section>
 
         <menu>
-          <button id="clearTicket" class="danger" value="default" type="button">Liberar numero</button>
-          <button id="saveTicket" class="primary" value="default" type="button">Salvar</button>
+          <button id="clearTicket" class="danger admin-only" value="default" type="button">Liberar numero</button>
+          <button id="saveTicket" class="primary" value="default" type="button">Reservar numero</button>
         </menu>
       </form>
     </dialog>
