@@ -1,5 +1,7 @@
 const STORAGE_KEY = "rifa-baby-mirella-henry-v1";
 const FILTERS = ["all", "Livre", "Reservado", "Pago"];
+const SUPABASE_URL = "https://zkcezxyuslqwyvgpqtfl.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_XTi9Rv-Pr7xkl-k6Yr39xw_EtiiiPAb";
 const PIX_CONFIG = {
   key: "42526966825",
   receiverName: "MARIA EDUARDA DA SILVA",
@@ -103,6 +105,51 @@ function save() {
     hour: "2-digit",
     minute: "2-digit"
   });
+}
+
+async function supabaseRequest(path, options = {}) {
+  const response = await fetch(`${SUPABASE_URL}${path}`, {
+    ...options,
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      "Content-Type": "application/json",
+      ...(options.headers || {})
+    }
+  });
+
+  if (!response.ok) {
+    const detail = await response.text();
+    throw new Error(detail || "Erro no Supabase");
+  }
+
+  return response.status === 204 ? null : response.json();
+}
+
+function applyCloudTickets(rows) {
+  const byNumber = new Map(rows.map((row) => [Number(row.number), row]));
+  state.tickets = state.tickets.map((ticket) => {
+    const cloud = byNumber.get(ticket.number);
+    if (!cloud) return ticket;
+    return {
+      ...ticket,
+      status: cloud.status || ticket.status,
+      updatedAt: cloud.updated_at || ticket.updatedAt
+    };
+  });
+}
+
+async function syncFromCloud() {
+  if (els.dialog.open) return;
+  try {
+    const rows = await supabaseRequest("/rest/v1/rifa_baby_numbers?select=number,status,updated_at&order=number.asc");
+    applyCloudTickets(rows || []);
+    save();
+    render();
+    els.saveState.textContent = "Sincronizado online";
+  } catch {
+    els.saveState.textContent = "Modo offline neste aparelho";
+  }
 }
 
 function money(value) {
@@ -329,6 +376,39 @@ function updateSelectedTicket(nextValues) {
   render();
 }
 
+async function reserveSelectedOnline(nextValues) {
+  try {
+    const [reserved] = await supabaseRequest("/rest/v1/rpc/rifa_baby_reserve_ticket", {
+      method: "POST",
+      body: JSON.stringify({
+        p_number: state.selectedNumber,
+        p_name: nextValues.name,
+        p_phone: nextValues.phone,
+        p_note: nextValues.note || null
+      })
+    });
+
+    updateSelectedTicket({
+      ...nextValues,
+      status: reserved?.status || "Reservado",
+      updatedAt: reserved?.updated_at || new Date().toISOString()
+    });
+    els.saveState.textContent = "Reservado online";
+    return true;
+  } catch (error) {
+    await syncFromCloud();
+    const message = String(error.message || "");
+    if (message.includes("numero_indisponivel")) {
+      alert("Esse numero acabou de ser reservado por outra pessoa. Escolha outro numero livre.");
+      return false;
+    }
+
+    alert("Nao consegui reservar online agora. Verifique a internet e tente novamente.");
+    return false;
+  }
+}
+
+
 function download(filename, content, type) {
   const blob = new Blob([content], { type });
   const link = document.createElement("a");
@@ -446,9 +526,15 @@ function wireEvents() {
     });
   }
 
-  els.saveTicket.addEventListener("click", () => {
+  els.saveTicket.addEventListener("click", async () => {
     if (!state.adminMode && !requireBuyerData()) return;
-    updateSelectedTicket(selectedTicketValues());
+    const nextValues = selectedTicketValues();
+    if (state.adminMode) {
+      updateSelectedTicket(nextValues);
+    } else {
+      const reserved = await reserveSelectedOnline(nextValues);
+      if (!reserved) return;
+    }
     els.dialog.close();
   });
 
@@ -480,9 +566,10 @@ function wireEvents() {
   }
 
   if (els.sendProof) {
-    els.sendProof.addEventListener("click", () => {
+    els.sendProof.addEventListener("click", async () => {
       if (!requireBuyerData()) return;
-      updateSelectedTicket(selectedTicketValues());
+      const reserved = await reserveSelectedOnline(selectedTicketValues());
+      if (!reserved) return;
       openWhatsAppProof();
       els.dialog.close();
     });
@@ -514,4 +601,6 @@ load();
 wireEvents();
 save();
 render();
+syncFromCloud();
+setInterval(syncFromCloud, 15000);
 registerServiceWorker();
