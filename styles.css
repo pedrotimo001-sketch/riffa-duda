@@ -93,7 +93,8 @@ button {
 }
 
 .step-pills span,
-.status-legend span {
+.status-legend span,
+.admin-toggle {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -106,6 +107,21 @@ button {
   font-size: 0.78rem;
   font-weight: 900;
   text-transform: uppercase;
+}
+
+.admin-toggle {
+  background: linear-gradient(145deg, #fff, #f7ecdf);
+  color: var(--muted);
+}
+
+body:not(.admin-mode) .admin-only {
+  display: none !important;
+}
+
+body.admin-mode .admin-toggle {
+  border-color: rgba(79, 154, 103, 0.5);
+  background: linear-gradient(145deg, #effbf3, #c9efd5);
+  color: #23643d;
 }
 
 .raffle-poster {
@@ -1112,6 +1128,14 @@ dialog::backdrop {
   border-color: rgba(79, 154, 103, 0.42);
   background: linear-gradient(145deg, #effbf3, #c9efd5);
   color: #23643d;
+}
+
+.pix-actions .whatsapp-button {
+  grid-column: 1 / -1;
+  border-color: rgba(79, 154, 103, 0.5);
+  background: linear-gradient(145deg, #35c46a, #148b46);
+  color: #fff;
+  box-shadow: 0 10px 18px rgba(20, 139, 70, 0.18);
 }
 
 .editor menu button {
