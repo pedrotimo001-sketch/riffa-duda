@@ -215,6 +215,10 @@ function renderGrid() {
   items.forEach((ticket) => {
     const node = els.template.content.firstElementChild.cloneNode(true);
     node.dataset.status = ticket.status;
+    node.setAttribute(
+      "aria-label",
+      `Numero ${numberLabel(ticket.number)}, ${ticket.status}${ticket.name ? `, ${ticket.name}` : ""}`
+    );
     node.querySelector(".ticket-number").textContent = numberLabel(ticket.number);
     node.querySelector(".ticket-status").textContent = ticket.status;
     node.querySelector(".ticket-person").textContent = ticket.name || "Toque para cadastrar";
