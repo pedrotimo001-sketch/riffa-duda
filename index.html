@@ -190,6 +190,24 @@
           <textarea id="ticketNote" rows="3" placeholder="Pix, combinado, responsavel..."></textarea>
         </label>
 
+        <section class="pix-card" aria-label="Pagamento por Pix">
+          <div>
+            <span class="eyebrow">Pagamento Pix</span>
+            <strong id="pixAmount">R$ 10,00</strong>
+            <p>Depois de preencher nome e telefone, salve para reservar. Pague no Pix e envie o comprovante.</p>
+          </div>
+          <img id="pixQr" alt="QR Code Pix da Rifa Baby">
+          <label class="field">
+            <span>Pix copia e cola</span>
+            <textarea id="pixCopyPaste" rows="4" readonly></textarea>
+          </label>
+          <div class="pix-actions">
+            <button id="copyPix" type="button">Copiar Pix</button>
+            <button id="copyPixKey" type="button">Copiar chave</button>
+          </div>
+          <small id="pixReceiver">Maria Eduarda Da Silva Santos</small>
+        </section>
+
         <menu>
           <button id="clearTicket" class="danger" value="default" type="button">Liberar numero</button>
           <button id="saveTicket" class="primary" value="default" type="button">Salvar</button>
