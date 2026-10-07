@@ -1,4 +1,4 @@
-const CACHE_NAME = "rifa-baby-v3";
+const CACHE_NAME = "rifa-baby-v4";
 const ASSETS = [
   "./",
   "./index.html",
