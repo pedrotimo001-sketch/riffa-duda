@@ -1,5 +1,12 @@
 const STORAGE_KEY = "rifa-baby-mirella-henry-v1";
 const FILTERS = ["all", "Livre", "Reservado", "Pago"];
+const PIX_CONFIG = {
+  key: "42526966825",
+  receiverName: "MARIA EDUARDA DA SILVA",
+  receiverLabel: "Maria Eduarda Da Silva Santos",
+  city: "RIO DE JANEIRO",
+  description: "Rifa Baby"
+};
 
 const state = {
   ticketValue: 10,
@@ -35,6 +42,12 @@ const els = {
   buyerPhone: document.querySelector("#buyerPhone"),
   ticketStatus: document.querySelector("#ticketStatus"),
   ticketNote: document.querySelector("#ticketNote"),
+  pixAmount: document.querySelector("#pixAmount"),
+  pixQr: document.querySelector("#pixQr"),
+  pixCopyPaste: document.querySelector("#pixCopyPaste"),
+  pixReceiver: document.querySelector("#pixReceiver"),
+  copyPix: document.querySelector("#copyPix"),
+  copyPixKey: document.querySelector("#copyPixKey"),
   saveTicket: document.querySelector("#saveTicket"),
   clearTicket: document.querySelector("#clearTicket"),
   exportJson: document.querySelector("#exportJson"),
@@ -93,6 +106,45 @@ function money(value) {
     style: "currency",
     currency: "BRL"
   });
+}
+
+function emv(id, value) {
+  const stringValue = String(value);
+  return `${id}${String(stringValue.length).padStart(2, "0")}${stringValue}`;
+}
+
+function crc16(payload) {
+  let crc = 0xffff;
+  for (let index = 0; index < payload.length; index += 1) {
+    crc ^= payload.charCodeAt(index) << 8;
+    for (let bit = 0; bit < 8; bit += 1) {
+      crc = (crc & 0x8000) ? (crc << 1) ^ 0x1021 : crc << 1;
+      crc &= 0xffff;
+    }
+  }
+  return crc.toString(16).toUpperCase().padStart(4, "0");
+}
+
+function pixPayload(number) {
+  const amount = state.ticketValue.toFixed(2);
+  const txid = `RIFA${String(number).padStart(3, "0")}`;
+  const merchantAccount = emv("00", "br.gov.bcb.pix")
+    + emv("01", PIX_CONFIG.key)
+    + emv("02", `${PIX_CONFIG.description} ${number}`);
+  const additionalData = emv("05", txid);
+  const payload = [
+    emv("00", "01"),
+    emv("26", merchantAccount),
+    emv("52", "0000"),
+    emv("53", "986"),
+    emv("54", amount),
+    emv("58", "BR"),
+    emv("59", PIX_CONFIG.receiverName.slice(0, 25)),
+    emv("60", PIX_CONFIG.city.slice(0, 15)),
+    emv("62", additionalData)
+  ].join("");
+  const withCrcHeader = `${payload}6304`;
+  return `${withCrcHeader}${crc16(withCrcHeader)}`;
 }
 
 function numberLabel(number) {
@@ -184,11 +236,18 @@ function render() {
 function openEditor(number) {
   const ticket = state.tickets.find((item) => item.number === number);
   state.selectedNumber = number;
+  const payload = pixPayload(number);
   els.editorNumber.textContent = numberLabel(number);
   els.buyerName.value = ticket.name || "";
   els.buyerPhone.value = ticket.phone || "";
   els.ticketStatus.value = ticket.status || "Livre";
   els.ticketNote.value = ticket.note || "";
+  if (els.pixAmount) els.pixAmount.textContent = money(state.ticketValue);
+  if (els.pixCopyPaste) els.pixCopyPaste.value = payload;
+  if (els.pixReceiver) els.pixReceiver.textContent = `${PIX_CONFIG.receiverLabel} | Chave Pix: ${PIX_CONFIG.key}`;
+  if (els.pixQr) {
+    els.pixQr.src = `https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${encodeURIComponent(payload)}`;
+  }
   els.dialog.showModal();
 }
 
@@ -315,10 +374,13 @@ function wireEvents() {
   });
 
   els.saveTicket.addEventListener("click", () => {
+    const nextStatus = els.ticketStatus.value === "Livre" && (els.buyerName.value.trim() || els.buyerPhone.value.trim())
+      ? "Reservado"
+      : els.ticketStatus.value;
     updateSelectedTicket({
       name: els.buyerName.value.trim(),
       phone: els.buyerPhone.value.trim(),
-      status: els.ticketStatus.value,
+      status: nextStatus,
       note: els.ticketNote.value.trim()
     });
     els.dialog.close();
@@ -334,6 +396,20 @@ function wireEvents() {
   if (els.shareSummary) {
     els.shareSummary.addEventListener("click", () => {
       shareSummary().catch(() => alert("Nao foi possivel compartilhar agora."));
+    });
+  }
+
+  if (els.copyPix) {
+    els.copyPix.addEventListener("click", async () => {
+      await navigator.clipboard.writeText(els.pixCopyPaste.value);
+      alert("Pix copia e cola copiado.");
+    });
+  }
+
+  if (els.copyPixKey) {
+    els.copyPixKey.addEventListener("click", async () => {
+      await navigator.clipboard.writeText(PIX_CONFIG.key);
+      alert("Chave Pix copiada.");
     });
   }
 
