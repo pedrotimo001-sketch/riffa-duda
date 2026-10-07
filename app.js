@@ -14,6 +14,7 @@ const state = {
   ticketValue: 10,
   activeFilter: "all",
   adminMode: false,
+  adminPassword: sessionStorage.getItem("rifaBabyAdminPassword") || "",
   query: "",
   selectedNumber: null,
   tickets: []
@@ -142,6 +143,11 @@ function applyCloudTickets(rows) {
 async function syncFromCloud() {
   if (els.dialog.open) return;
   try {
+    if (state.adminMode) {
+      await syncAdminFromCloud();
+      return;
+    }
+
     const rows = await supabaseRequest("/rest/v1/rifa_baby_numbers?select=number,status,updated_at&order=number.asc");
     applyCloudTickets(rows || []);
     save();
@@ -150,6 +156,30 @@ async function syncFromCloud() {
   } catch {
     els.saveState.textContent = "Modo offline neste aparelho";
   }
+}
+
+async function syncAdminFromCloud(password = state.adminPassword) {
+  const rows = await supabaseRequest("/rest/v1/rpc/rifa_baby_admin_list_orders", {
+    method: "POST",
+    body: JSON.stringify({ p_admin_password: password })
+  });
+
+  const byNumber = new Map((rows || []).map((row) => [Number(row.number), row]));
+  state.tickets = state.tickets.map((ticket) => {
+    const cloud = byNumber.get(ticket.number);
+    if (!cloud) return ticket;
+    return {
+      ...ticket,
+      status: cloud.status || ticket.status,
+      name: cloud.buyer_name || "",
+      phone: cloud.buyer_phone || "",
+      note: cloud.buyer_note || "",
+      updatedAt: cloud.updated_at || ticket.updatedAt
+    };
+  });
+  save();
+  render();
+  els.saveState.textContent = "Admin online";
 }
 
 function money(value) {
@@ -408,6 +438,70 @@ async function reserveSelectedOnline(nextValues) {
   }
 }
 
+async function adminUpdateSelectedOnline(nextValues) {
+  try {
+    const [updated] = await supabaseRequest("/rest/v1/rpc/rifa_baby_admin_update_ticket", {
+      method: "POST",
+      body: JSON.stringify({
+        p_admin_password: state.adminPassword,
+        p_number: state.selectedNumber,
+        p_status: nextValues.status,
+        p_name: nextValues.name || null,
+        p_phone: nextValues.phone || null,
+        p_note: nextValues.note || null
+      })
+    });
+
+    updateSelectedTicket({
+      ...nextValues,
+      status: updated?.status || nextValues.status,
+      updatedAt: updated?.updated_at || new Date().toISOString()
+    });
+    await syncAdminFromCloud();
+    els.saveState.textContent = "Alteracao salva online";
+    return true;
+  } catch (error) {
+    const message = String(error.message || "");
+    if (message.includes("senha_incorreta")) {
+      sessionStorage.removeItem("rifaBabyAdminPassword");
+      state.adminPassword = "";
+      state.adminMode = false;
+      render();
+      alert("Senha do organizador incorreta.");
+      return false;
+    }
+
+    alert("Nao consegui salvar no Supabase agora. Tente novamente.");
+    return false;
+  }
+}
+
+async function enableAdminMode() {
+  const password = prompt("Senha do organizador");
+  if (!password) return;
+
+  try {
+    await syncAdminFromCloud(password);
+    state.adminPassword = password;
+    sessionStorage.setItem("rifaBabyAdminPassword", password);
+    state.adminMode = true;
+    await syncAdminFromCloud(password);
+    render();
+  } catch (error) {
+    const message = String(error.message || "");
+    alert(message.includes("senha_incorreta") ? "Senha incorreta." : "Nao consegui entrar no modo organizador.");
+  }
+}
+
+function disableAdminMode() {
+  state.adminMode = false;
+  state.adminPassword = "";
+  sessionStorage.removeItem("rifaBabyAdminPassword");
+  render();
+  syncFromCloud();
+}
+
+
 
 function download(filename, content, type) {
   const blob = new Blob([content], { type });
@@ -520,9 +614,13 @@ function wireEvents() {
   });
 
   if (els.adminToggle) {
-    els.adminToggle.addEventListener("click", () => {
-      state.adminMode = !state.adminMode;
-      render();
+    els.adminToggle.addEventListener("click", async () => {
+      if (state.adminMode) {
+        disableAdminMode();
+        return;
+      }
+
+      await enableAdminMode();
     });
   }
 
@@ -530,7 +628,8 @@ function wireEvents() {
     if (!state.adminMode && !requireBuyerData()) return;
     const nextValues = selectedTicketValues();
     if (state.adminMode) {
-      updateSelectedTicket(nextValues);
+      const saved = await adminUpdateSelectedOnline(nextValues);
+      if (!saved) return;
     } else {
       const reserved = await reserveSelectedOnline(nextValues);
       if (!reserved) return;
@@ -538,8 +637,14 @@ function wireEvents() {
     els.dialog.close();
   });
 
-  els.clearTicket.addEventListener("click", () => {
-    updateSelectedTicket({ name: "", phone: "", status: "Livre", note: "" });
+  els.clearTicket.addEventListener("click", async () => {
+    const cleared = { name: "", phone: "", status: "Livre", note: "" };
+    if (state.adminMode) {
+      const saved = await adminUpdateSelectedOnline(cleared);
+      if (!saved) return;
+    } else {
+      updateSelectedTicket(cleared);
+    }
     els.dialog.close();
   });
 
