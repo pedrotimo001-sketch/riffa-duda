@@ -15,7 +15,20 @@
   </head>
   <body>
     <main class="app-shell">
+      <section class="sales-strip" aria-label="Como participar">
+        <div>
+          <span class="eyebrow">Rifa online</span>
+          <strong>Escolha seu numero, pague no Pix e envie o comprovante.</strong>
+        </div>
+        <div class="step-pills" aria-label="Passos da compra">
+          <span>1 Escolher</span>
+          <span>2 Pix</span>
+          <span>3 Reservar</span>
+        </div>
+      </section>
+
       <section class="raffle-poster" aria-label="Rifa Baby Mirella ou Henry">
+        <div class="poster-badge">Toque no numero livre</div>
         <div class="party-ribbon"></div>
         <div class="balloons balloons-left" aria-hidden="true">
           <span></span><span></span><span></span>
@@ -51,7 +64,17 @@
         </header>
 
         <section class="board-frame">
+          <div class="board-label">
+            <span>Escolha seu numero da sorte</span>
+            <strong>100 chances</strong>
+          </div>
           <section id="grid" class="number-grid" aria-label="Numeros da rifa"></section>
+        </section>
+
+        <section class="status-legend" aria-label="Legenda dos numeros">
+          <span><b class="dot free"></b>Livre</span>
+          <span><b class="dot reserved"></b>Reservado</span>
+          <span><b class="dot paid"></b>Pago</span>
         </section>
 
         <section class="poster-stats" aria-label="Resumo da rifa">
@@ -83,6 +106,14 @@
       </section>
 
       <section class="control-panel" aria-label="Controles da rifa">
+        <header class="panel-head">
+          <div>
+            <span class="eyebrow">Painel do organizador</span>
+            <strong>Controle de vendas</strong>
+          </div>
+          <span>Salva neste iPhone</span>
+        </header>
+
         <div class="money-card">
           <span>Arrecadado</span>
           <strong id="paidTotal">R$ 0,00</strong>
@@ -196,6 +227,11 @@
             <strong id="pixAmount">R$ 10,00</strong>
             <p>Depois de preencher nome e telefone, salve para reservar. Pague no Pix e envie o comprovante.</p>
           </div>
+          <ol class="checkout-steps">
+            <li>Copie o Pix ou leia o QR Code</li>
+            <li>Pague no aplicativo do banco</li>
+            <li>Envie o comprovante para confirmar</li>
+          </ol>
           <img id="pixQr" alt="QR Code Pix da Rifa Baby">
           <label class="field">
             <span>Pix copia e cola</span>
