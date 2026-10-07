@@ -11,6 +11,7 @@ const PIX_CONFIG = {
 const state = {
   ticketValue: 10,
   activeFilter: "all",
+  adminMode: false,
   query: "",
   selectedNumber: null,
   tickets: []
@@ -56,6 +57,9 @@ const els = {
   importJson: document.querySelector("#importJson"),
   resetDemo: document.querySelector("#resetDemo")
 };
+
+els.adminToggle = document.querySelector("#adminToggle");
+els.sendProof = document.querySelector("#sendProof");
 
 function createTickets() {
   return Array.from({ length: 100 }, (_, index) => ({
@@ -230,6 +234,13 @@ function renderGrid() {
 
 function render() {
   els.ticketValue.value = state.ticketValue;
+  document.body.classList.toggle("admin-mode", state.adminMode);
+  if (els.adminToggle) {
+    els.adminToggle.textContent = state.adminMode ? "Sair organizador" : "Organizador";
+  }
+  if (els.saveTicket) {
+    els.saveTicket.textContent = state.adminMode ? "Salvar alteracao" : "Reservar numero";
+  }
   els.chips.forEach((chip) => {
     chip.classList.toggle("active", chip.dataset.filter === state.activeFilter);
   });
@@ -239,6 +250,11 @@ function render() {
 
 function openEditor(number) {
   const ticket = state.tickets.find((item) => item.number === number);
+  if (!state.adminMode && ticket.status !== "Livre") {
+    alert(`Esse numero ja esta ${ticket.status.toLowerCase()}. Escolha outro numero livre.`);
+    return;
+  }
+
   state.selectedNumber = number;
   const payload = pixPayload(number);
   els.editorNumber.textContent = numberLabel(number);
@@ -253,6 +269,52 @@ function openEditor(number) {
     els.pixQr.src = `https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${encodeURIComponent(payload)}`;
   }
   els.dialog.showModal();
+}
+
+function requireBuyerData() {
+  if (!els.buyerName.value.trim()) {
+    alert("Preencha o nome para reservar o numero.");
+    els.buyerName.focus();
+    return false;
+  }
+
+  if (!els.buyerPhone.value.trim()) {
+    alert("Preencha o telefone para confirmar a reserva.");
+    els.buyerPhone.focus();
+    return false;
+  }
+
+  return true;
+}
+
+function selectedTicketValues() {
+  const buyerFilled = els.buyerName.value.trim() || els.buyerPhone.value.trim();
+  const status = state.adminMode
+    ? els.ticketStatus.value
+    : (buyerFilled ? "Reservado" : "Livre");
+
+  return {
+    name: els.buyerName.value.trim(),
+    phone: els.buyerPhone.value.trim(),
+    status,
+    note: els.ticketNote.value.trim()
+  };
+}
+
+function reservationMessage() {
+  return [
+    "Ola! Fiz o Pix da Rifa Baby Mirella ou Henry.",
+    `Numero escolhido: ${numberLabel(state.selectedNumber)}`,
+    `Nome: ${els.buyerName.value.trim()}`,
+    `Telefone: ${els.buyerPhone.value.trim()}`,
+    `Valor: ${money(state.ticketValue)}`,
+    "Vou enviar o comprovante aqui."
+  ].join("\n");
+}
+
+function openWhatsAppProof() {
+  const url = `https://wa.me/?text=${encodeURIComponent(reservationMessage())}`;
+  window.open(url, "_blank", "noopener,noreferrer");
 }
 
 function updateSelectedTicket(nextValues) {
@@ -377,16 +439,16 @@ function wireEvents() {
     });
   });
 
-  els.saveTicket.addEventListener("click", () => {
-    const nextStatus = els.ticketStatus.value === "Livre" && (els.buyerName.value.trim() || els.buyerPhone.value.trim())
-      ? "Reservado"
-      : els.ticketStatus.value;
-    updateSelectedTicket({
-      name: els.buyerName.value.trim(),
-      phone: els.buyerPhone.value.trim(),
-      status: nextStatus,
-      note: els.ticketNote.value.trim()
+  if (els.adminToggle) {
+    els.adminToggle.addEventListener("click", () => {
+      state.adminMode = !state.adminMode;
+      render();
     });
+  }
+
+  els.saveTicket.addEventListener("click", () => {
+    if (!state.adminMode && !requireBuyerData()) return;
+    updateSelectedTicket(selectedTicketValues());
     els.dialog.close();
   });
 
@@ -414,6 +476,15 @@ function wireEvents() {
     els.copyPixKey.addEventListener("click", async () => {
       await navigator.clipboard.writeText(PIX_CONFIG.key);
       alert("Chave Pix copiada.");
+    });
+  }
+
+  if (els.sendProof) {
+    els.sendProof.addEventListener("click", () => {
+      if (!requireBuyerData()) return;
+      updateSelectedTicket(selectedTicketValues());
+      openWhatsAppProof();
+      els.dialog.close();
     });
   }
 
